@@ -3,11 +3,11 @@
 read_amypro <- function(file) {
   amypro_seqs <- read_fasta(file)
   
-  lapply(names(amypro_seqs), read_amypro_single) %>% 
+  lapply(names(amypro_seqs), read_amypro_single, amypro_seqs = amypro_seqs) %>% 
     bind_rows()
 }
 
-read_amypro_single <- function(ith_seq_name) {
+read_amypro_single <- function(ith_seq_name, amypro_seqs) {
   # start of the amyloid region followed by the start of the closest non-amyloid region
   region_starts <- strsplit(ith_seq_name, "regions=[", fixed = TRUE)[[1]][2] %>% 
     strsplit(x = ., split = "]", fixed = TRUE) %>% 

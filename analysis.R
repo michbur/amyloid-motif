@@ -43,7 +43,8 @@ amypro_fasta <- read_amypro("./data/amypro.fasta") %>%
   mutate(ID = sapply(strsplit(amypro_fasta[["name"]], " "), first)) %>% 
   inner_join(amypro_df) %>% 
   select(-ID, -name) %>% 
-  rename(name = nice_name)
+  rename(name = nice_name) %>% 
+  mutate(name = paste0(name, " R", region_id))
 
 seqs_df <-  bind_rows(amypro_fasta, 
                       data.frame(name = names(pos_seqs_unique),
@@ -54,7 +55,7 @@ seqs_df <-  bind_rows(amypro_fasta,
                       data.frame(name = names(neg_seqs_unique),
                                  region_id = 1,
                                  seq = neg_seqs_unique,
-                                 amyloid = TRUE, 
+                                 amyloid = FALSE, 
                                  stringsAsFactors = FALSE))
 
 # <font color = "red"></font>

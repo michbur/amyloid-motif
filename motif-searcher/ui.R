@@ -25,6 +25,7 @@ shinyUI(fluidPage(
     ),
     
     mainPanel(
+      h3("Amyloids are in blue"),
       htmlOutput("motif_text")
     )
   )

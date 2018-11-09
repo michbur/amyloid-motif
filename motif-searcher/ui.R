@@ -1,11 +1,13 @@
 library(shiny)
 
 shinyUI(fluidPage(
+  theme = shinythemes::shinytheme("spacelab"),
   
   titlePanel("Amyloid motifs"),
   
   sidebarLayout(
     sidebarPanel(
+      includeMarkdown("intro.md"),
       selectInput("protein_type",
                   "Type of peptide/protein",
                   choices = c("All", "Only amyloids", "Only non-amyloids")),
@@ -21,11 +23,14 @@ shinyUI(fluidPage(
                               "3_4", "3__3", "6_33", "6___3", "3")),
       checkboxInput("only_motif",
                     "Select only proteins with motif"),
-      textInput("chosen_name", "Name or type of the sequence (partial matching allowed)", value = "")
+      textInput("chosen_name", "Name or type of the sequence (partial matching allowed)", value = ""),
+      plotOutput("motif_occ"),
+      selectInput("plot_type",
+                  "Type of plot",
+                  choices = c("Frequency density", "Absolute occurrence", "Absolute presence"))
     ),
     
     mainPanel(
-      h3("Amyloids are in blue"),
       htmlOutput("motif_text")
     )
   )

@@ -2,6 +2,7 @@ library(dplyr)
 library(biogram)
 library(AmyloGram)
 library(gsubfn)
+library(stringr)
 
 source("./functions/read_amypro.R")
 
@@ -40,7 +41,7 @@ amypro_df <- data.frame(amypro_raw[-1, ], stringsAsFactors = FALSE) %>%
   select(ID, nice_name)
 
 amypro_fasta <- read_amypro("./data/amypro.fasta") %>% 
-  mutate(ID = sapply(strsplit(amypro_fasta[["name"]], " "), first)) %>% 
+  mutate(ID = sapply(strsplit(name, " "), first)) %>% 
   inner_join(amypro_df) %>% 
   select(-ID, -name) %>% 
   rename(name = nice_name) %>% 
@@ -56,7 +57,8 @@ seqs_df <-  bind_rows(amypro_fasta,
                                  region_id = 1,
                                  seq = neg_seqs_unique,
                                  amyloid = FALSE, 
-                                 stringsAsFactors = FALSE))
+                                 stringsAsFactors = FALSE)) %>% 
+  mutate(name = paste0(name, ifelse(amyloid, " (amyloid)", " (non-amyloid)")))
 
 # <font color = "red"></font>
 
@@ -79,11 +81,11 @@ motifs <- lapply(ngram_freq[["regexp"]], function(ith_regexp) {
   mutate(seqs_df, 
          colored = sapply(seq, insert_br),
          colored = gsubfn(pattern = ith_regexp, replacement = function(x) paste0('<font color = "red">', x, "</font>"), 
-                                   x = colored))
+                                   x = colored),
+         n_times = str_count(string = colored, "color"))
 })
 
 names(motifs) <- as.character(ngram_freq[["decoded_name"]])
 
 save(motifs, file = "./motif-searcher/motifs.RData")
-
 

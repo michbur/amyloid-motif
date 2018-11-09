@@ -82,7 +82,8 @@ motifs <- lapply(ngram_freq[["regexp"]], function(ith_regexp) {
          colored = sapply(seq, insert_br),
          colored = gsubfn(pattern = ith_regexp, replacement = function(x) paste0('<font color = "red">', x, "</font>"), 
                                    x = colored),
-         n_times = str_count(string = colored, "color"))
+         n_times = str_count(string = colored, "color"),
+         seq_len = nchar(seq))
 })
 
 names(motifs) <- as.character(ngram_freq[["decoded_name"]])

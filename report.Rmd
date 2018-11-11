@@ -1,0 +1,91 @@
+---
+title: "Untitled"
+author: "Michał Burdukiewicz"
+date: "6 listopada 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars, results='asis'}
+library(dplyr)
+library(biogram)
+library(AmyloGram)
+library(gsubfn)
+
+source("./functions/read_amypro.R")
+
+ngram_freq <- read.csv("./data/ngram_freq.csv") %>% 
+  mutate(regexp = gsub("_", paste0(c("[", toupper(biogram:::return_elements("prot")), "]"), collapse = ""), 
+                       decoded_name, fixed = TRUE))
+
+amylogram_alph <- lapply(AmyloGram_model[["enc"]], toupper)
+
+# motifs that cannot be found in other motifs
+# unique_motif <- sapply(ngram_freq[["regexp"]], function(ith_motif) 
+#  sum(grepl(pattern = ith_motif, x = ngram_freq[["decoded_name"]]))) == 1
+
+neg_seqs <- read_fasta("./data/amyload-negative.fasta") %>% 
+  sapply(paste0, collapse = "")
+
+pos_seqs <- read_fasta("./data/amyload-positive.fasta") %>% 
+  sapply(paste0, collapse = "")
+
+pos_seqs[pos_seqs %in% neg_seqs]
+neg_seqs[neg_seqs %in% pos_seqs]
+# VTQEFW - the same seq in two data sets
+
+pos_seqs_unique <- pos_seqs[pos_seqs != "VTQEFW"]
+neg_seqs_unique <- neg_seqs[neg_seqs != "VTQEFW"]
+
+
+seqs_df <-  bind_rows(read_amypro("./data/amypro.fasta"), 
+                      data.frame(name = names(pos_seqs_unique),
+                                 region_id = 1,
+                                 seq = pos_seqs_unique,
+                                 amyloid = TRUE, 
+                                 stringsAsFactors = FALSE),
+                      data.frame(name = names(neg_seqs_unique),
+                                 region_id = 1,
+                                 seq = neg_seqs_unique,
+                                 amyloid = TRUE, 
+                                 stringsAsFactors = FALSE))
+
+# <font color = "red"></font>
+
+
+ith_regexp <- ngram_freq[["regexp"]][54]
+for(i in names(amylogram_alph))
+  ith_regexp <- gsub(pattern = i, replacement = paste0(c("[", amylogram_alph[[i]], "]"), collapse = ""), x = ith_regexp)
+
+ith_regexp
+
+example_seqs <- c("AALDVN", "PPPPIPIT", "PPPPPPPPPPPPPP")
+
+#labels_colors <- c("chartreuse3", "dodgerblue2", "firebrick1", "darkorange", "darkseagreen4", "darkorchid3")
+res <- mutate(seqs_df, colored = gsubfn(pattern = ith_regexp, replacement = function(x) paste0('<font color = "red">', x, "</font>"), 
+                                 x = seq))
+
+library(DT)
+
+datatable(res, escape = FALSE)
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
